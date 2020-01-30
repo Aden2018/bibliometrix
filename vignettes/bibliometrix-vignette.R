@@ -12,7 +12,7 @@ library(bibliometrix)   ### load bibliometrix package
 
 ## ----Data loading--------------------------------------------------------
 
-D <- readFiles("http://www.bibliometrix.org/datasets/savedrecs.bib")
+D <- readFiles("https://www.bibliometrix.org/datasets/savedrecs.bib")
 
 
 ## ----Data converting-----------------------------------------------------

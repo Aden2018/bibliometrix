@@ -4,7 +4,7 @@
 \alias{histNetwork}
 \title{Historical co-citation network}
 \usage{
-histNetwork(M, min.citations = 1, sep = ";")
+histNetwork(M, min.citations = 1, sep = ";", verbose = TRUE)
 }
 \arguments{
 \item{M}{is a bibliographic data frame obtained by the converting function
@@ -12,11 +12,13 @@ histNetwork(M, min.citations = 1, sep = ";")
 manuscripts and variables to Field Tag in the original SCOPUS and Clarivate
 Analitics Web of Science file.}
 
-\item{min.citations}{is an integer. It sets the minimum number of citations 
-for the documents included in the analysis. The default is \code{min.citations = 0}.}
+\item{min.citations}{is a positive integer. It sets the minimum number of citations 
+for the documents included in the analysis. It can be greater than or equal to 1. The default is \code{min.citations = 1}.}
 
 \item{sep}{is the field separator character. This character separates strings
 in CR column of the data frame. The default is \code{sep = ";"}.}
+
+\item{verbose}{is logical. If TRUE, results are printed on screen.}
 }
 \value{
 \code{histNetwork} returns an object of \code{class} "list"

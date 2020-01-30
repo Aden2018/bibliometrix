@@ -112,7 +112,10 @@ SR <- function(M){
       l=sub(" ",",",l, fixed = TRUE)
       l=sub(",,",",",l, fixed = TRUE)
       l=gsub(" ","",l, fixed = TRUE)})}
-  FirstAuthors=gsub(","," ",unlist(lapply(listAU,function(l) l[[1]])))
+  FirstAuthors=gsub(","," ",unlist(lapply(listAU, function(l){
+    if (length(l>0)) {l=l[[1]]} else (l="NA")
+    return(l)
+  })))
   
   if (!is.null(M$J9)){
     ## replace full title in no iso names
@@ -218,7 +221,7 @@ AU_CO<-function(M){
   ## remove reprint information from C1
   C1=unlist(lapply(C1,function(l){
     l=unlist(strsplit(l,";"))
-    l=l[regexpr("REPRINT AUTHOR",l)==-1]
+    #l=l[regexpr("REPRINT AUTHOR",l)==-1]
     l=paste0(l,collapse=";")
   }))
   ###
@@ -317,7 +320,7 @@ AU_UN<-function(M,sep){
   C1=M$C1
   C1=unlist(lapply(C1,function(l){
     l=unlist(strsplit(l,";"))
-    l=l[regexpr("REPRINT AUTHOR",l)==-1]
+    #l=l[regexpr("REPRINT AUTHOR",l)==-1]
     l=paste0(l,collapse=";")
   }))
   ###
@@ -371,7 +374,10 @@ AU_UN<-function(M,sep){
   
   
   ## identification of Corresponding author affiliation
-  RP=M$RP
+  if (!("RP" %in% names(M))){
+    M$RP <- NA
+  }
+  RP <- M$RP
   RP[is.na(RP)]=M$C1[is.na(RP)]
   AFF=gsub("\\[.*?\\] ", "", RP)
   indna=which(is.na(AFF))

@@ -1,6 +1,8 @@
 ## BIBLIOSHINY: A SHINY APP FOR BIBLIOMETRIX R-PACKAGE
 if (!(require(bibliometrix))){install.packages("bibliometrix"); require(bibliometrix, quietly=TRUE)}
 if (!(require(shiny))){install.packages("shiny"); require(shiny, quietly=TRUE)} 
+#if (!(require(shinyFiles))){install.packages("shiny"); require(shinyFiles, quietly=TRUE)} 
+#if (!(require(fs))){install.packages("shiny"); require(fs, quietly=TRUE)} 
 if (!(require(rio))){install.packages("rio")} 
 if (!(require(DT))){install.packages("DT")} 
 if (!(require(ggplot2))){install.packages("ggplot2"); require(ggplot2, quietly=TRUE)} 
@@ -46,12 +48,12 @@ ui <-  navbarPage("biblioshiny for bibliometrix",
                                  Its development can address a large and active community of developers formed by prominent researchers."),
                                br(),
                                p(em("bibliometrix"),"provides various routines for importing bibliographic data from SCOPUS, 
-                                 Clarivate Analytics' Web of Science, PubMed and Cochrane databases, performing bibliometric 
+                                 Clarivate Analytics' Web of Science, Dimensions, PubMed and Cochrane databases, performing bibliometric 
                                  analysis and building data matrices for co-citation, coupling, scientific collaboration analysis and co-word analysis."),
                                br(),
                                p("For an introduction and live examples, visit the ",
                                  a("bibliometrix website.", 
-                                   href = "http://www.bibliometrix.org")),
+                                   href = "https://www.bibliometrix.org")),
                                br(),
                                
                                h2("Workflow"),
@@ -63,7 +65,7 @@ ui <-  navbarPage("biblioshiny for bibliometrix",
                                
                                h2("Example"),
                                br(),
-                               p("Step 1 - Download an example at the following", a("link",href = "http://www.bibliometrix.org/datasets/joi.zip", target="_blank"),
+                               p("Step 1 - Download an example at the following", a("link",href = "https://www.bibliometrix.org/datasets/joi.zip", target="_blank"),
                                ". It includes all articles published by the", em("Journal of Informetrics"), "from 2007 to 2017."),  
                                p("Step 2 - In the ",strong("Load ") ,"menu, select ",strong("'Web of Knowledge'")," as database and ",strong("'Plaintext'")," as file format."),
                                p("Step 3 - Choose and load the file", strong("joi.zip")," using the ",strong("browse")," button."),
@@ -78,48 +80,84 @@ ui <-  navbarPage("biblioshiny for bibliometrix",
 ### Loading page ----
 
 tabPanel(
-  "Load", 
+  "Data", 
   sidebarLayout(
     sidebarPanel(width=3,
-                 h3(em(strong("Loading and Converting "))),
+                 h3(em(strong("Import or Load "))),
                  br(),
-      selectInput("dbsource", 
+                 selectInput("load", 
+                             label = "Please, choose what to do",
+                             choices = c(" "="null",
+                                         "Import raw file(s)"="import", 
+                                         "Load bibliometrix file(s)"="load"),
+                             selected = "null"),
+                 #br(),
+     conditionalPanel(condition = "input.load == 'import'",
+                  selectInput("dbsource", 
                   label = "Database",
                   choices = c("Web of Science (WoS/WoK)"="isi", 
-                              "Scopus"="scopus"),
-                  selected = "isi"),
-      conditionalPanel(condition = "input.dbsource == 'isi'",
+                              "Scopus"="scopus",
+                              "Dimensions"="dimensions"),
+                  selected = "isi")),
+      conditionalPanel(condition = "input.dbsource == 'isi' & input.load == 'import'",
                        selectInput("format", 
                                    label = "File format",
                                    choices = c("Plain Text"="plaintext", 
                                                "BibTeX"="bibtex"),
                                    selected = "plaintext")),
-      fileInput("file1", "Choose a file",
+      conditionalPanel(condition = "input.dbsource == 'dimensions' & input.load == 'import'",
+                       selectInput("format", 
+                                   label = "File format",
+                                   choices = c("Excel (Topic Analysis)"="excel",
+                                               "CSV (bibliometric mapping)"="csv"),
+                                   selected = "excel")),
+      
+     
+     conditionalPanel(condition = "input.load != 'null'",
+     fileInput("file1", "Choose a file",
                 multiple = FALSE,
                 accept = c(
-                  "text/csv",
-                  "text/comma-separated-values,text/plain",
+                  ".csv",
                   ".txt",
                   ".bib",
-                  ".RData",
                   ".xlsx",
+                  ".zip",
                   ".xls",
-                  ".zip")
-      ),
-      h6("Here accept single .txt/.bib/.xslx/.RData files, or multiple .txt/.bib files compressed in a single .zip archive."),
-      actionButton("applyLoad", "Start Conversion"),
+                  ".rdata",
+                  ".rda",
+                  ".rds")
+      )),
+      #h6("Here accept single .txt/.bib/.csv/.xslx/.RData files, or multiple .txt/.bib/.csv files compressed in a single .zip archive."),
+     conditionalPanel(condition = "input.load != 'null'",
+                      actionButton("applyLoad", "Start ")),
       tags$hr(),
       
       uiOutput("textLog"),
       #shinycssloaders::withSpinner(verbatimTextOutput("log")),
       
+      tags$hr(),
       
+      h3(em(strong("Export a bibliometrix file "))),
+      br(),
+     
       ### download xlsx
-      selectInput('save_file', 'Save as:', choices = c('No, thanks!' = 'no_thanks', 'Excel' = 'xlsx')),
-      conditionalPanel(condition = "input.save_file == 'xlsx'",
-              downloadButton("collection.save", "Save"))
-    ),
-    mainPanel(
+     #  selectInput('save_file', 'Save as:', choices = c(' ' ='null',
+     #                                                   'Excel/R format' = 'xlsx'),
+     #              selected = 'null'),
+     # ### prova
+     # conditionalPanel(condition = "input.save_file != 'null'",
+     # shinySaveButton("save", "Save file", "Save file as ...", filetype=list(xlsx="xlsx", RData="RData")))#,
+     # 
+     # ###FINE PROVA
+     ### download xlsx
+     selectInput('save_file', 'Save as:', choices = c(' ' ='null',
+                                                      'Excel' = 'xlsx',
+                                                      'R Data Format' = 'RData'),
+                 selected = 'null'),
+     conditionalPanel(condition = "input.save_file != 'null'",
+                      downloadButton("collection.save", "Export"))
+     ),
+     mainPanel(
       ## color of datatable
       tags$head(tags$style(HTML("table.dataTable.hover tbody tr:hover, table.dataTable.display tbody tr:hover {
                                   background-color: #9c4242 !important;
@@ -140,7 +178,7 @@ tabPanel(
                     sidebarLayout(
                       
                       sidebarPanel(width=3,
-                                   h3(em(strong("Filtering "))),
+                                   h3(em(strong("Filter "))),
                                    br(),
                                    uiOutput("textDim"),
                                    uiOutput("selectType"),
@@ -235,7 +273,7 @@ navbarMenu("Dataset",
                                                            "Sources" = "SO",
                                                            "References" = "CR",
                                                            "Cited Sources" = "CR_SO"),
-                                               selected = "DE"),
+                                               selected = "AU"),
                                   sliderInput("CentralFieldn", 
                                                 label=("Middle Field: Number of items"), 
                                                 min = 1, max = 50, step = 1, value = 20),
@@ -251,7 +289,7 @@ navbarMenu("Dataset",
                                                            "Sources" = "SO",
                                                            "References" = "CR",
                                                            "Cited Sources" = "CR_SO"),
-                                                           selected = "AU"),
+                                                           selected = "CR"),
                                   sliderInput("LeftFieldn", 
                                               label=("Left Field: Number of items"), 
                                               min = 1, max = 50, step = 1, value = 20),
@@ -267,7 +305,7 @@ navbarMenu("Dataset",
                                                            "Sources" = "SO",
                                                            "References" = "CR",
                                                            "Cited Sources" = "CR_SO"),
-                                                           selected = "SO"),
+                                                           selected = "DE"),
                                   sliderInput("RightFieldn", 
                                               label=("Right Field: Number of items"), 
                                               min = 1, max = 50, step = 1, value = 20)
@@ -460,6 +498,30 @@ navbarMenu("Authors",
                     )
            ),
            
+           ### MOST LOCAL CITED AUTHORS
+           tabPanel("Most Local Cited Authors",
+                    sidebarLayout(
+                      sidebarPanel(width=3,
+                                   h3(em(strong("Most Local Cited Authors"))),
+                                   br(),
+                                   h4(em(strong("Graphical Parameters: "))),
+                                   "  ",
+                                   numericInput("MostCitAuthorsK", 
+                                                label=("Number of Authors"), 
+                                                value = 20)
+                      ),
+                      mainPanel(
+                        tabsetPanel(type = "tabs",
+                                    tabPanel("Plot",
+                                             shinycssloaders::withSpinner(plotlyOutput(outputId = "MostCitAuthorsPlot", height = 700))
+                                    ),
+                                    tabPanel("Table",
+                                             shinycssloaders::withSpinner(DT::DTOutput("MostCitAuthorsTable"))
+                                    ))
+                      )
+                    )
+           ),
+           
            ### AUTHORS' PRODUCTION OVER TIME  ----
            tabPanel("Authors' Production over Time",
                     sidebarLayout(
@@ -486,6 +548,7 @@ navbarMenu("Authors",
                       )
                     )
            ),
+           
 
            ### LOTKA LAW ----
            tabPanel("Lotka's law",
@@ -1082,10 +1145,14 @@ navbarMenu("Conceptual Structure",
                                                 "inclusion",
                                                 "equivalence"),
                                     selected = "association"),
-                        
+                        selectInput("cocyears",
+                                    label = "Node Color by Year",
+                                    choices = c("No" = "No",
+                                                "Yes"= "Yes"),
+                                    selected = "No"),
                         selectInput("cocCluster", 
                                     label = "Clustering Algorithm",
-                                    choices = c("None" = "none", 
+                                    choices = c("None" = "none",
                                                 "Edge Betweenness" = "edge_betweenness",
                                                 "InfoMap" = "infomap",
                                                 "Leading Eigenvalues" = "leading_eigen",
@@ -1119,7 +1186,7 @@ navbarMenu("Conceptual Structure",
                                     label = "Opacity",
                                     min = 0,
                                     max = 1,
-                                    value = 0.5,
+                                    value = 0.7,
                                     step=0.05),
                         sliderInput(inputId = "Labels",
                                     label = "Number of labels",
@@ -1253,7 +1320,7 @@ navbarMenu("Conceptual Structure",
                                                            "Stability Index" = "stability"
                                                ),
                                                selected = "weighted"),
-                                   sliderInput("minFlowTE", label="Min Weigth Index",value=0.1,min=0.02,max=1,step=0.02),
+                                   sliderInput("minFlowTE", label="Min Weight Index",value=0.1,min=0.02,max=1,step=0.02),
                                    sliderInput("sizeTE", label="Label size",value=0.3,min=0.0,max=1,step=0.05),
                                    sliderInput("TEn.labels", label="Number of Labels (for each cluster)",value=1,min=1,max=5,step=1),
                                    br(),
@@ -1509,7 +1576,7 @@ navbarMenu("Intellectual Structure",
                                     label = "Opacity",
                                     min = 0,
                                     max = 1,
-                                    value = 0.5,
+                                    value = 0.7,
                                     step=0.05),
                         selectInput(inputId ="citShortlabel",
                                     label = "Short Label",
@@ -1714,7 +1781,7 @@ navbarMenu("Social Structure",
                                                label = "Opacity",
                                                min = 0,
                                                max = 1,
-                                               value = 0.5,
+                                               value = 0.7,
                                                step=0.05),
                                    sliderInput(inputId = "colLabels",
                                                label = "Number of labels",

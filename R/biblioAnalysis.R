@@ -49,7 +49,6 @@
 #' @export
 
 biblioAnalysis<-function(M,sep=";"){
-
   # initialize variables
   Authors=NULL
   Authors_frac=NULL
@@ -86,14 +85,17 @@ if ("AU" %in% Tags){
   listAU=strsplit(as.character(M$AU),sep)
   listAU=lapply(listAU, function(l) trim(l))
   nAU=unlist(lapply(listAU,length))  # num. of authors per paper
-  fracAU=unlist(sapply(nAU,function(x){rep(1/x,x)}))  # fractional frequencies
+  fracAU=unlist(lapply(nAU,function(x){rep(1/x,x)}))  # fractional frequencies
   AU=unlist(listAU)
 
   Authors=sort(table(AU),decreasing=TRUE)
   Authors_frac=aggregate(fracAU,by=list(AU),'sum')
   names(Authors_frac)=c("Author","Frequency")
   Authors_frac=Authors_frac[order(-Authors_frac$Frequency),]
-  FirstAuthors=unlist(lapply(listAU,function(l) l[[1]]))
+  FirstAuthors=unlist(lapply(listAU,function(l){
+    if (length(l)>0){l=l[[1]]} else {l=NA}
+    return(l)
+  }))
   
   AuSingleAuthoredArt=length(unique(FirstAuthors[nAU==1]))
   AuMultiAuthoredArt=length(Authors)-AuSingleAuthoredArt
@@ -104,7 +106,7 @@ if ("TC" %in% Tags){
   TC=as.numeric(M$TC)
   PY=as.numeric(M$PY)
   CurrentYear=as.numeric(format(Sys.Date(),"%Y"))
-  TCperYear=TC/(CurrentYear-PY)
+  TCperYear=TC/(CurrentYear-PY+1)
   MostCitedPapers=data.frame(M$SR,TC,TCperYear)
   MostCitedPapers=MostCitedPapers[order(TC,decreasing=TRUE),]
   names(MostCitedPapers)=c("Paper         ","TC","TCperYear")
@@ -150,8 +152,8 @@ if (("C1" %in% Tags) & (sum(!is.na(M$C1))>0)){
   countries=as.character(countries[[1]])
   
   ### new code{
-
-    M=metaTagExtraction(M,Field="AU1_CO",sep)
+    if (!("AU1_CO" %in% names(M))){
+      M=metaTagExtraction(M,Field="AU1_CO",sep)}
     CO=M$AU1_CO
 
     Country=tableTag(M,"AU1_CO")
@@ -159,7 +161,7 @@ if (("C1" %in% Tags) & (sum(!is.na(M$C1))>0)){
     SCP_MCP=countryCollaboration(M,Country,k=length(Country),sep)
   
 }else{
-    M$AU_CO1=NA
+    M$AU1_CO=NA
     SCP_MCP=data.frame(Country=rep(NA,1),SCP=rep(NA,1))
 }
 if ("DT" %in% names(M)){
