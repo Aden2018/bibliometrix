@@ -4,15 +4,15 @@ bibliometrix
 
 ## An R-tool for comprehensive science mapping analysis. 
 
-[![bibliometrix: An R-tool for comprehensive science mapping analysis.](http://www.bibliometrix.org/altro/JOI-badge.svg)](https://doi.org/10.1016/j.joi.2017.08.007)
+[![bibliometrix: An R-tool for comprehensive science mapping analysis.](https://www.bibliometrix.org/altro/JOI-badge.svg)](https://doi.org/10.1016/j.joi.2017.08.007)
 [![Project Status: Active - The project has reached a stable, usable state and is being actively developed.](http://www.repostatus.org/badges/latest/active.svg)](http://www.repostatus.org/#active)
-[![Build Status](http://www.bibliometrix.org/passing.png)](http://www.bibliometrix.org)
+[![Build Status](https://www.bibliometrix.org/passing.png)](https://www.bibliometrix.org)
 [![rstudio mirror downloads](https://cranlogs.r-pkg.org/badges/bibliometrix)](https://github.com/metacran/cranlogs.app)
 [![cran version](http://www.r-pkg.org/badges/version/bibliometrix)](https://cran.r-project.org/package=bibliometrix)
 
 
 <p align="center">
-<img src="http://www.bibliometrix.org/logo.png" width="300"  />
+<img src="https://www.bibliometrix.org/logo.png" width="300"  />
 </p>
 
 ## Overview
@@ -78,7 +78,7 @@ Aria, M. & Cuccurullo, C. (2017) **bibliometrix: An R-tool for comprehensive sci
 
 ## Community
 
-Official website:   http://www.bibliometrix.org
+Official website:   https://www.bibliometrix.org
 
 CRAN page:          https://cran.r-project.org/package=bibliometrix
     
@@ -127,7 +127,7 @@ The export file can be read by R using the function *readFiles*:
 ```{r Data loading}
 ## An example from bibliometrix vignettes
 
-D <- readFiles("http://www.bibliometrix.org/datasets/savedrecs.bib")
+D <- readFiles("https://www.bibliometrix.org/datasets/savedrecs.bib")
 ```
 
 D is a large character vector. 
